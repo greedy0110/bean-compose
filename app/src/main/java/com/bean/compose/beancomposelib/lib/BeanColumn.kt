@@ -1,7 +1,10 @@
 package com.bean.compose.beancomposelib.lib
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 
 // 커스텀 Column 을 만들어보자.
@@ -13,11 +16,28 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun BeanColumn(
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    Layout(
+        content = content,
+        modifier = modifier,
+    ) { measurables, constraints ->
+        val placeables = measurables.map { it.measure(constraints) }
+
+        val width = placeables.maxOf { it.width } // 자식 중 가장 큰 자식 만큼 width
+        val height = placeables.sumOf { it.height } // 모든 자식의 크기 만큼 height
+        layout(width, height) {
+            var y = 0
+            for (placeable in placeables) {
+                placeable.place(0, y)
+                y += placeable.height
+            }
+        }
+    }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun BeanColumnPreview() {
     BeanColumn {
